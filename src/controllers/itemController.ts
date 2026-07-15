@@ -179,6 +179,7 @@ export const addReview = async (req: AuthRequest, res: Response) => {
       name: req.user?.name || "Anonymous",
       rating: Number(rating),
       comment,
+      createdAt: new Date(),
     };
 
     item.reviews.push(review);
