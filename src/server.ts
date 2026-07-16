@@ -6,6 +6,8 @@ import authRoutes from "./routes/auth";
 import itemRoutes from "./routes/items";
 import errorHandler from "./middleware/errorHandler";
 import Item from "./models/Item";
+import User from "./models/User";
+import { seedUsers, seedItems } from "./seedData";
 
 dotenv.config();
 
@@ -52,6 +54,29 @@ app.get("/api/stats", async (req, res) => {
 
 app.get("/api/health", (req, res) => {
   res.json({ success: true, message: "NestFinder API is running" });
+});
+
+app.get("/api/admin/seed/:secret", async (req, res) => {
+  if (req.params.secret !== "nestfinder-reseed-2024") {
+    return res.status(403).json({ message: "Unauthorized" });
+  }
+  try {
+    await Item.deleteMany({});
+    await User.deleteMany({});
+    const createdUsers = (await User.create(seedUsers as any)) as unknown as any[];
+    const adminUser = createdUsers[0];
+    const itemsWithOwner = seedItems.map((item) => ({
+      ...item,
+      owner: adminUser._id,
+    }));
+    await Item.insertMany(itemsWithOwner);
+    res.json({
+      success: true,
+      message: `Seeded ${createdUsers.length} users and ${itemsWithOwner.length} items`,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message || "Seed failed" });
+  }
 });
 
 app.use(errorHandler);
