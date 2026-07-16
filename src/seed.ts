@@ -359,7 +359,7 @@ const seedDB = async () => {
     await Item.deleteMany({});
     await User.deleteMany({});
 
-    const createdUsers = await User.insertMany(users);
+    const createdUsers = await User.create(users);
     const adminUser = createdUsers[0];
 
     const itemsWithOwner = items.map((item) => ({
