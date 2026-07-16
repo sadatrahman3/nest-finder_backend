@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db";
 import authRoutes from "./routes/auth";
 import itemRoutes from "./routes/items";
+import adminRoutes from "./routes/admin";
 import errorHandler from "./middleware/errorHandler";
 import Item from "./models/Item";
 import User from "./models/User";
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/stats", async (req, res) => {
   try {

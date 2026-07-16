@@ -113,7 +113,10 @@ export const updateItem = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    if (item.owner.toString() !== req.user?._id.toString()) {
+    if (
+      item.owner.toString() !== req.user?._id.toString() &&
+      req.user?.role !== "admin"
+    ) {
       return res
         .status(403)
         .json({ message: "Not authorized to update this item" });
@@ -196,9 +199,11 @@ export const addReview = async (req: AuthRequest, res: Response) => {
 
 export const getMyItems = async (req: AuthRequest, res: Response) => {
   try {
-    const items = await Item.find({ owner: req.user?._id }).sort({
-      createdAt: -1,
-    });
+    const query =
+      req.user?.role === "admin" ? {} : { owner: req.user?._id };
+    const items = await Item.find(query)
+      .sort({ createdAt: -1 })
+      .populate("owner", "name email avatar");
     res.json({ success: true, data: items });
   } catch (error: any) {
     res.status(500).json({ message: error.message || "Server error" });
